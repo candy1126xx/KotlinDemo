@@ -5,11 +5,15 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import com.candy1126xx.kotlindemo.ServerModel.HomeServerModel
+import com.candy1126xx.kotlindemo.View.HomeView
+import com.candy1126xx.kotlindemo.ViewModel.HomeViewModel
+import org.jetbrains.anko.AnkoContext
 import org.jetbrains.anko.support.v4.withArguments
 
 /**
- * Created by Administrator on 2017/4/21 0021.
+ *  把HomeView作为Fragment的rootView，创建出HomeViewModel
+ *  然后就可以通过改变HomeViewModel同步更新UI了
  */
 class HomeFragment : Fragment() {
 
@@ -23,18 +27,23 @@ class HomeFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val v = TextView(activity)
-        v.text = "这是首页"
-        return v
+        rootView = HomeView<HomeFragment>()
+        return rootView.createView(AnkoContext.create(activity, HomeFragment()))
+    }
 
-        // 下面这个写法会报错，不知道为什么
-//        return UI {
-//            verticalLayout {
-//                textView {
-//                    text = "这是首页"
-//                }
-//            }
-//        }.view
+
+    lateinit var rootView: HomeView<HomeFragment>
+
+    lateinit var model: HomeServerModel<HomeFragment>
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        model = HomeServerModel<HomeFragment>().bindViewModel(HomeViewModel(rootView))
+        model.getServerData()
+
+        view?.setOnClickListener {
+            model.changeAge()
+        }
     }
 
 }
